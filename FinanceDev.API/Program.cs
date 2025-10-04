@@ -1,3 +1,10 @@
+using FinanceDev.Application.Services;
+using FinanceDev.Domain.Interface.Repository;
+using FinanceDev.Domain.Interface.Service;
+using FinanceDev.Infra.Repositories;
+using FinanceDev.Infraestructure;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,7 +12,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IMesVencimentoService, MesVencimentoService>();
+
+builder.Services.AddScoped<IMesVencimentoRepository, MesVencimentoRepository>();
 builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

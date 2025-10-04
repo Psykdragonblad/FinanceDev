@@ -4,6 +4,12 @@ namespace FinanceDev.Infraestructure
 {
     public class AppDbContext : DbContext
     {
+
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
         public DbSet<DI1> DI1 { get; set; }
         public DbSet<MesVencimento> MesVencimento { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
