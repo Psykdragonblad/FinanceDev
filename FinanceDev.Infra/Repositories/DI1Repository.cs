@@ -1,5 +1,6 @@
-﻿using FinanceDev.Domain;
+﻿using FinanceDev.Domain.Entities;
 using FinanceDev.Domain.Interface;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,20 @@ namespace FinanceDev.Infraestructure.Repositories
             _context = context;
         }
 
-        public void Adicionar(DI1 entidade)
+        public void AddAsync(DI1 entidade)
         {
-           _context.DI1.Add(entidade);
+           _context.DI1.AddAsync(entidade);
            _context.SaveChanges();
+        }
+
+        public async Task<IEnumerable<DI1>> GetByDataAsync(DateTime data) {
+            return await _context.DI1.Where(e => e.DataReferencia == data).AsNoTracking().ToListAsync();
+        
+        }
+
+        Task IAdicionar<DI1>.AddAsync(DI1 entidade)
+        {
+            throw new NotImplementedException();
         }
     }
 }

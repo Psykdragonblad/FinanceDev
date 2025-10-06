@@ -1,17 +1,14 @@
-﻿using FinanceDev.Domain;
+﻿using FinanceDev.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 namespace FinanceDev.Infraestructure
 {
     public class AppDbContext : DbContext
     {
 
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
-        public DbSet<DI1> DI1 { get; set; }
-        public DbSet<MesVencimento> MesVencimento { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite("Data Source=finance.db");
@@ -40,6 +37,10 @@ namespace FinanceDev.Infraestructure
                 new MesVencimento { Id = 12, Codigo = "Z", Mes = "Dezembro" }
             );
         }
+
+        public DbSet<DI1> DI1 { get; set; }
+        public DbSet<MesVencimento> MesVencimento { get; set; }
+        public DbSet<DI1Curva> DI1Curva { get; set; }
 
     }
 }

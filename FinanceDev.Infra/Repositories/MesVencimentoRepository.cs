@@ -1,10 +1,12 @@
-﻿using FinanceDev.Domain;
+﻿using FinanceDev.Domain.Entities;
 using FinanceDev.Domain.Interface;
 using FinanceDev.Domain.Interface.Repository;
+using FinanceDev.Domain.Shared;
 using FinanceDev.Infraestructure;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,8 +22,8 @@ namespace FinanceDev.Infra.Repositories
             _appDbContext = appDbContext;
         }
 
-        public Task<List<MesVencimento>> GetAll() {
-            return _appDbContext.MesVencimento.ToListAsync();
+        public async Task<IEnumerable<MesVencimento>> GetAll() {
+            return await _appDbContext.MesVencimento.AsNoTracking().ToListAsync();
         }
     }
 }

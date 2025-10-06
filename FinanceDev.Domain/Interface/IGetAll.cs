@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FinanceDev.Domain.Shared;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace FinanceDev.Domain.Interface
 {
     public interface IGetAll<T>
     {
-        Task<List<T>> GetAll();
+        Task<IEnumerable<T>> GetAll();
     }
 }

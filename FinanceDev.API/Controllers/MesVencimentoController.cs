@@ -1,8 +1,8 @@
-﻿using FinanceDev.Application.DTO;
-using FinanceDev.Application.Services;
-using FinanceDev.Domain;
+﻿using FinanceDev.Application.Services;
+using FinanceDev.Domain.Entities;
 using FinanceDev.Domain.Interface;
 using FinanceDev.Domain.Interface.Service;
+using FinanceDev.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceDev.API.Controllers
@@ -18,8 +18,11 @@ namespace FinanceDev.API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<ResultResponse<MesVencimento>> GetAll() {
+        public ActionResult<ResultResponse<IEnumerable<MesVencimento>>> GetAll() {
            var result = _mesVencimentoService.GetAll();
+
+           // DI1Service d = new DI1Service();
+           // d.teste();
             return Ok(result);
         }
     }
