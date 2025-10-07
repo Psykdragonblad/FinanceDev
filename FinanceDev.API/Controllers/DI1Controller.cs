@@ -1,4 +1,5 @@
-﻿using FinanceDev.Domain.Interface.Service;
+﻿using FinanceDev.Application.DTO;
+using FinanceDev.Domain.Interface.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceDev.Controllers
@@ -20,9 +21,9 @@ namespace FinanceDev.Controllers
         }
 
         [HttpPost("GerarCarga")]
-        public string GerarCarga(DateTime data)
+        public string GerarCarga([FromBody] GerarCargaRequest request)
         {
-            _curvaService.Add(data);
+            _curvaService.Add(request.Data);
             return "teste";
         }
     }

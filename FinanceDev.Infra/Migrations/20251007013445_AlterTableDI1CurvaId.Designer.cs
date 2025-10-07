@@ -3,6 +3,7 @@ using System;
 using FinanceDev.Infraestructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceDev.Infra.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251007013445_AlterTableDI1CurvaId")]
+    partial class AlterTableDI1CurvaId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -43,13 +46,16 @@ namespace FinanceDev.Infra.Migrations
                     b.Property<int>("IdReferenciaCurva")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ReferenciaCurvaId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Vencimento")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdReferenciaCurva");
+                    b.HasIndex("ReferenciaCurvaId");
 
                     b.ToTable("DI1Curva");
                 });
@@ -169,7 +175,7 @@ namespace FinanceDev.Infra.Migrations
                 {
                     b.HasOne("FinanceDev.Domain.Entities.ReferenciaCurva", "ReferenciaCurva")
                         .WithMany()
-                        .HasForeignKey("IdReferenciaCurva")
+                        .HasForeignKey("ReferenciaCurvaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

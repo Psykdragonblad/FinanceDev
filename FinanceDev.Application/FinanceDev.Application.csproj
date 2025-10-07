@@ -15,8 +15,4 @@
     <ProjectReference Include="..\FinanceDev.Domain\FinanceDev.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTO\" />
-  </ItemGroup>
-
 </Project>

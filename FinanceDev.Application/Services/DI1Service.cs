@@ -17,11 +17,13 @@ namespace FinanceDev.Application.Services
     public class DI1Service: IDI1CurvaService
     {
         private readonly IDI1CurvaRepository _dI1CurvaRepository;
+        private readonly IReferenciaCurvaRepository _ReferenciaCurvaRepository;
         private readonly string? _caminhoArquivo;
 
-        public DI1Service(IDI1CurvaRepository dI1CurvaRepository, IConfiguration configuration) 
+        public DI1Service(IDI1CurvaRepository dI1CurvaRepository, IReferenciaCurvaRepository ReferenciaCurvaRepository, IConfiguration configuration) 
         { 
             _dI1CurvaRepository = dI1CurvaRepository;
+            _ReferenciaCurvaRepository = ReferenciaCurvaRepository;
             _caminhoArquivo = configuration["Arquivos:DI1Curva"];
         }
 
@@ -51,20 +53,29 @@ namespace FinanceDev.Application.Services
                 string caminhoArquivo = _caminhoArquivo + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx";// @"C:\Users\Marcos\Desktop\DI1-03-10-2025.xlsx";
                 var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 18);
                 List<DI1Curva> dd = new List<DI1Curva>();
+                var referencia = new ReferenciaCurva
+                {
+                    Categoria = "DI1",
+                    DataReferencia = dataReferencia
+                };
+                await _ReferenciaCurvaRepository.AddAsync(referencia);
                 foreach (var linha in linhas)
                 {
                     if (linha["Coluna14"] != "")
                     {
-                        dd.Add(new DI1Curva()
+                        /* dd.Add(new DI1Curva()
+                         {
+                             Vencimento = linha["Coluna1"],
+                             Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture)//(double)linha["Coluna14"]
+                         });*/
+                        var di1curva = new DI1Curva
                         {
                             Vencimento = linha["Coluna1"],
-                            Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture)//(double)linha["Coluna14"]
-                        });
-                        await _dI1CurvaRepository.AddAsync(new DI1Curva 
-                        {
-                            Vencimento = linha["Coluna1"],
-                            Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture)
-                        });
+                            Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture),
+                            IdReferenciaCurva = referencia.Id
+                        };
+
+                        await _dI1CurvaRepository.AddAsync(di1curva);
                     }
 
                     Console.WriteLine(linha["Coluna1"]+" - "+ linha["Coluna14"]);
@@ -81,10 +92,10 @@ namespace FinanceDev.Application.Services
                 //await _dI1CurvaRepository.AddAsync(new DI1Curva { });
                 return ResultResponse.Ok("DI1 Cadastrado com sucesso!");
             }
-            catch (Exception)
+            catch (Exception e)
             {
 
-                throw;
+                return ResultResponse.Fail($"Erro ao gerar carga: {e.Message}");
             }
             
         }
