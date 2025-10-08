@@ -4,10 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FinanceDev.Domain.Interface
+namespace FinanceDev.Application.DTO
 {
-    public interface IAdicionar<T>
-    {
-        Task AddAsync(T entidade);
-    }
+    public record DI1CurvaDto(int Id, string Vencimento, double Ajuste);
 }

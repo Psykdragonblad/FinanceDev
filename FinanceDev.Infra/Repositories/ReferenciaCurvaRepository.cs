@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FinanceDev.Domain.Entities;
 using FinanceDev.Domain.Interface.Repository;
 using FinanceDev.Infraestructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceDev.Infra.Repositories
 {
@@ -22,6 +23,12 @@ namespace FinanceDev.Infra.Repositories
         {
             await _appDbContext.AddAsync(entidade);
             await _appDbContext.SaveChangesAsync();
+        }
+
+        public async Task<bool> ExistsAsync(DateTime data)
+        {
+            return await _appDbContext.ReferenciaCurva
+                        .AnyAsync(w => w.DataReferencia == data);
         }
     }
 }

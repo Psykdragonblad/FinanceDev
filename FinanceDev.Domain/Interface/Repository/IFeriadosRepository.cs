@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace FinanceDev.Domain.Interface.Repository
 {
-    public interface IDI1CurvaRepository: IAdicionar<DI1Curva>
+    public interface IFeriadosRepository : IGetAll<Feriado>
     {
-        Task<IEnumerable<DI1Curva>> GetByDataAsync(DateTime data);
     }
 }

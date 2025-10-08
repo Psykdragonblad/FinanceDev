@@ -1,4 +1,5 @@
 ﻿using FinanceDev.Domain.Entities;
+using FinanceDev.Domain.Interface.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,6 @@ namespace FinanceDev.Domain.Interface.Repository
 {
     public interface IReferenciaCurvaRepository : IAdicionar<ReferenciaCurva>
     {
+        Task<bool> ExistsAsync(DateTime data);
     }
 }

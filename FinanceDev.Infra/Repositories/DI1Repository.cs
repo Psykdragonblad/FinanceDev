@@ -1,5 +1,5 @@
 ﻿using FinanceDev.Domain.Entities;
-using FinanceDev.Domain.Interface;
+using FinanceDev.Domain.Interface.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FinanceDev.Infraestructure.Repositories
 {
-    public class DI1Repository : IAdicionar<DI1>
+    public class DI1Repository// : IAdicionar<DI1>
     {
         private readonly AppDbContext _context;
 
@@ -29,9 +29,9 @@ namespace FinanceDev.Infraestructure.Repositories
         
         }
 
-        Task IAdicionar<DI1>.AddAsync(DI1 entidade)
+       /* Task IAdicionar<DI1>.AddAsync(DI1 entidade)
         {
             throw new NotImplementedException();
-        }
+        }*/
     }
 }

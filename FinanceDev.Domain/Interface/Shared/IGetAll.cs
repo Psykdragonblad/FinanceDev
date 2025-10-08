@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FinanceDev.Domain.Interface
+namespace FinanceDev.Domain.Interface.Shared
 {
     public interface IGetAll<T>
     {

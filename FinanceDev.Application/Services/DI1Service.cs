@@ -1,8 +1,9 @@
 ﻿using ClosedXML.Excel;
+using FinanceDev.Application.DTO;
 using FinanceDev.Application.Helpers;
 using FinanceDev.Domain.Entities;
 using FinanceDev.Domain.Interface.Repository;
-using FinanceDev.Domain.Interface.Service;
+using FinanceDev.Application.Interface;
 using FinanceDev.Domain.Shared;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -27,7 +28,7 @@ namespace FinanceDev.Application.Services
             _caminhoArquivo = configuration["Arquivos:DI1Curva"];
         }
 
-        public async Task<ResultResponse<IEnumerable<DI1Curva>>> GetByDataAsync(DateTime date)
+        public async Task<ResultResponse<IEnumerable<DI1CurvaDto>>> GetByDataAsync(DateTime date)
         {
             try
             {
@@ -35,14 +36,20 @@ namespace FinanceDev.Application.Services
 
                 if (!retorno.Any())
                 {
-                    return ResultResponse<IEnumerable<DI1Curva>>.Fail("Dados não encontrado");
+                    return ResultResponse<IEnumerable<DI1CurvaDto>>.Fail("Dados não encontrado");
                 }
 
-                return ResultResponse<IEnumerable<DI1Curva>>.Ok(retorno);
+                var retornoDto = retorno.Select(s => new DI1CurvaDto(
+                                                s.Id,
+                                                s.Vencimento,
+                                                s.Ajuste
+                                                )).ToList();
+
+                return ResultResponse<IEnumerable<DI1CurvaDto>>.Ok(retornoDto);
             }
             catch (Exception e)
             {
-                return ResultResponse<IEnumerable<DI1Curva>>.Fail($"Erro ao buscar dados: {e.Message}");
+                return ResultResponse<IEnumerable<DI1CurvaDto>>.Fail($"Erro ao buscar dados: {e.Message}");
             }
         }
 
@@ -50,111 +57,55 @@ namespace FinanceDev.Application.Services
         {
             try
             {
-                string caminhoArquivo = _caminhoArquivo + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx";// @"C:\Users\Marcos\Desktop\DI1-03-10-2025.xlsx";
+                var inicio = new DateTime(2025, 08, 15);
+                var fim = new DateTime(2025, 09, 1);
+                List<DateTime> lista = new List<DateTime>();
+                lista.Add(new DateTime(2025,09,7));
+
+                var du = DataUtils.DiasUteis(inicio, fim,lista,true);
+                var dc = fim - inicio;
+                var u = dc.Days;
+                string caminhoArquivo = Path.Combine(_caminhoArquivo, "DI1-" + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx");
                 var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 18);
-                List<DI1Curva> dd = new List<DI1Curva>();
-                var referencia = new ReferenciaCurva
+
+                if (linhas == null || !linhas.Any())
+                    return ResultResponse.Fail("Nenhum dado encontrado no arquivo. Verifique se o formato e a linha inicial estão corretos.");
+
+
+                if (!await _ReferenciaCurvaRepository.ExistsAsync(dataReferencia))
                 {
-                    Categoria = "DI1",
-                    DataReferencia = dataReferencia
-                };
-                await _ReferenciaCurvaRepository.AddAsync(referencia);
-                foreach (var linha in linhas)
-                {
-                    if (linha["Coluna14"] != "")
+                    var referencia = new ReferenciaCurva
                     {
-                        /* dd.Add(new DI1Curva()
-                         {
-                             Vencimento = linha["Coluna1"],
-                             Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture)//(double)linha["Coluna14"]
-                         });*/
-                        var di1curva = new DI1Curva
+                        Categoria = "DI1",
+                        DataReferencia = dataReferencia
+                    };
+
+                    await _ReferenciaCurvaRepository.AddAsync(referencia);
+
+                    foreach (var linha in linhas)
+                    {
+                        if (linha["Coluna14"] != "")
                         {
-                            Vencimento = linha["Coluna1"],
-                            Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture),
-                            IdReferenciaCurva = referencia.Id
-                        };
+                            var di1curva = new DI1Curva
+                            {
+                                Vencimento = linha["Coluna1"],
+                                Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture),
+                                IdReferenciaCurva = referencia.Id
+                            };
 
-                        await _dI1CurvaRepository.AddAsync(di1curva);
+                            await _dI1CurvaRepository.AddAsync(di1curva);
+                        }
                     }
-
-                    Console.WriteLine(linha["Coluna1"]+" - "+ linha["Coluna14"]);
-
-                    /* var item = new MesVencimento
-                     {
-                         Nome = linha.GetValueOrDefault("Nome"),
-                         Data = DateTime.TryParse(linha.GetValueOrDefault("Data"), out var dt) ? dt : DateTime.MinValue,
-                         Valor = decimal.TryParse(linha.GetValueOrDefault("Valor"), out var val) ? val : 0m
-                     };
-
-                     lista.Add(item);*/
+                    return ResultResponse.Ok("DI1 Cadastrado com sucesso!");
                 }
-                //await _dI1CurvaRepository.AddAsync(new DI1Curva { });
-                return ResultResponse.Ok("DI1 Cadastrado com sucesso!");
+                else
+                    return ResultResponse.Fail("Já existe uma carga para essa data de referência");
             }
             catch (Exception e)
             {
-
                 return ResultResponse.Fail($"Erro ao gerar carga: {e.Message}");
-            }
-            
+            }            
         }
-        /* public Task<List<DI1Curva>> GetDI1Curva(DateTime dataReferencia) {
-             if (dataReferencia == DateTime.MinValue)
-                 return BadRequst();
-         }*/
-        public void teste()
-        {
-            string caminhoArquivo = @"C:\Users\Marcos\Desktop\DI1-03-10-2025.xlsx";
-            var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false,linhaInicial:18);
-            List<DI1Curva> dd = new List<DI1Curva>();
-            foreach (var linha in linhas)
-            {
-                if(linha["Coluna14"] != "")
-                {
-                    dd.Add(new DI1Curva()
-                    {
-                        Vencimento = linha["Coluna1"],
-                        Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture)//(double)linha["Coluna14"]
-                    });
-                }
-               
-                //Console.WriteLine(linha["Coluna1"]+" - "+ linha["Coluna14"]);
-                
-               /* var item = new MesVencimento
-                {
-                    Nome = linha.GetValueOrDefault("Nome"),
-                    Data = DateTime.TryParse(linha.GetValueOrDefault("Data"), out var dt) ? dt : DateTime.MinValue,
-                    Valor = decimal.TryParse(linha.GetValueOrDefault("Valor"), out var val) ? val : 0m
-                };
-
-                lista.Add(item);*/
-            }
-            foreach (var item in dd)
-            {
-                Console.WriteLine(item.Vencimento + " - " +item.Ajuste);
-            }
-            /* string caminhoArquivo = @"C:\Users\Marcos\Desktop\DI1-03-10-2025.xlsx";
-
-             // Abre o arquivo
-             using (var workbook = new XLWorkbook(caminhoArquivo))
-             {
-                 var planilha = workbook.Worksheet(1); // ou pelo nome: workbook.Worksheet("Planilha1")
-
-                 // Identifica o intervalo usado na planilha
-                 var range = planilha.RangeUsed();
-
-                 // Percorre as linhas e colunas
-                 foreach (var linha in range.Rows().Skip(16))
-                 {
-                     foreach (var celula in linha.Cells())
-                     {
-                         Console.Write(celula.GetValue<string>() + "\t");
-                     }
-                     Console.WriteLine();
-                 }
-             }*/
-
-        }
+        
     }
 }

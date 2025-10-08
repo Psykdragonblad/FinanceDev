@@ -3,6 +3,7 @@ using FinanceDev.API.Middlewares;
 using FinanceDev.Application.Services;
 using FinanceDev.Domain.Interface.Repository;
 using FinanceDev.Domain.Interface.Service;
+using FinanceDev.Application.Interface;
 using FinanceDev.Infra.Repositories;
 using FinanceDev.Infraestructure;
 using Microsoft.EntityFrameworkCore;

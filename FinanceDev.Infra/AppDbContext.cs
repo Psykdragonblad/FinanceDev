@@ -41,6 +41,8 @@ namespace FinanceDev.Infraestructure
         public DbSet<DI1> DI1 { get; set; }
         public DbSet<MesVencimento> MesVencimento { get; set; }
         public DbSet<DI1Curva> DI1Curva { get; set; }
+        public DbSet<ReferenciaCurva> ReferenciaCurva { get; set; }
+        public DbSet<Feriado> Feriado { get; set; }
 
     }
 }

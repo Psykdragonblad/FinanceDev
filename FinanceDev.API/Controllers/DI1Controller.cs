@@ -1,5 +1,7 @@
 ﻿using FinanceDev.Application.DTO;
+using FinanceDev.Application.Interface;
 using FinanceDev.Domain.Interface.Service;
+using FinanceDev.Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceDev.Controllers
@@ -16,15 +18,25 @@ namespace FinanceDev.Controllers
         }
 
         [HttpGet("GetByData")]
-        public string GetAction(int id) {
-            return "teste";
+        public async Task<ActionResult<IEnumerable<ResultResponse>>> GetAction([FromBody] GerarCargaRequest request) 
+        {
+            var retorno = await _curvaService.GetByDataAsync(request.Data);
+
+            if (!retorno.Success)
+                return BadRequest(retorno);
+
+            return Ok(retorno);
         }
 
         [HttpPost("GerarCarga")]
-        public string GerarCarga([FromBody] GerarCargaRequest request)
+        public async Task<ActionResult<ResultResponse>> GerarCarga([FromBody] GerarCargaRequest request)
         {
-            _curvaService.Add(request.Data);
-            return "teste";
+            var retorno = await _curvaService.Add(request.Data);
+
+            if (!retorno.Success)
+                return BadRequest(retorno);
+
+            return Ok(retorno);
         }
     }
 }
