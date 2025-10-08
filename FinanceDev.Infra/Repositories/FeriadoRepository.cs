@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FinanceDev.Infra.Repositories
 {
-    public class FeriadoRepository : IFeriadosRepository
+    public class FeriadoRepository : IFeriadoRepository
     {
         private readonly AppDbContext _appDbContext;
         public FeriadoRepository(AppDbContext appDbContext) { 
@@ -18,7 +18,7 @@ namespace FinanceDev.Infra.Repositories
         }
         public async Task<IEnumerable<Feriado>> GetAll()
         {
-            return await _appDbContext.Feriado.ToListAsync();
+            return await _appDbContext.Feriado.AsNoTracking().ToListAsync();
         }
     }
 }

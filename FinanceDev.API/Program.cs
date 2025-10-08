@@ -41,6 +41,7 @@ builder.Services.AddScoped<IDI1CurvaService, DI1Service>();
 builder.Services.AddScoped<IMesVencimentoRepository, MesVencimentoRepository>();
 builder.Services.AddScoped<IDI1CurvaRepository, DI1CurvaRepository>();
 builder.Services.AddScoped<IReferenciaCurvaRepository, ReferenciaCurvaRepository>();
+builder.Services.AddScoped<IFeriadoRepository, FeriadoRepository>();
 builder.Services.AddSwaggerGen();
 
 

@@ -19,12 +19,14 @@ namespace FinanceDev.Application.Services
     {
         private readonly IDI1CurvaRepository _dI1CurvaRepository;
         private readonly IReferenciaCurvaRepository _ReferenciaCurvaRepository;
+        private readonly IFeriadoRepository _feriadoRepository;
         private readonly string? _caminhoArquivo;
 
-        public DI1Service(IDI1CurvaRepository dI1CurvaRepository, IReferenciaCurvaRepository ReferenciaCurvaRepository, IConfiguration configuration) 
+        public DI1Service(IDI1CurvaRepository dI1CurvaRepository, IReferenciaCurvaRepository ReferenciaCurvaRepository, IFeriadoRepository feriadoRepository,IConfiguration configuration) 
         { 
             _dI1CurvaRepository = dI1CurvaRepository;
             _ReferenciaCurvaRepository = ReferenciaCurvaRepository;
+            _feriadoRepository = feriadoRepository;
             _caminhoArquivo = configuration["Arquivos:DI1Curva"];
         }
 
@@ -57,14 +59,6 @@ namespace FinanceDev.Application.Services
         {
             try
             {
-                var inicio = new DateTime(2025, 08, 15);
-                var fim = new DateTime(2025, 09, 1);
-                List<DateTime> lista = new List<DateTime>();
-                lista.Add(new DateTime(2025,09,7));
-
-                var du = DataUtils.DiasUteis(inicio, fim,lista,true);
-                var dc = fim - inicio;
-                var u = dc.Days;
                 string caminhoArquivo = Path.Combine(_caminhoArquivo, "DI1-" + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx");
                 var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 18);
 
@@ -105,6 +99,37 @@ namespace FinanceDev.Application.Services
             {
                 return ResultResponse.Fail($"Erro ao gerar carga: {e.Message}");
             }            
+        }
+
+        public async Task<ResultResponse<IEnumerable<DI1Curva>>> CurvaDI1(DateTime dataReferencia)
+        {
+            double PuValorRef = 100000;
+
+            var inicio = new DateTime(2025, 08, 15);
+            var fim = new DateTime(2025, 11, 3);
+            //List<DateTime> lista = new List<DateTime>();
+            var feriados = await _feriadoRepository.GetAll();
+            var datas = feriados.Select(r => r.Data);
+            //lista.AddRange(datas);
+            //lista.Add(new DateTime(2025,09,7));
+            var curva = await _dI1CurvaRepository.GetByDataAsync(dataReferencia);
+            //DI1CurvaRelatorioDto relatorio;
+
+            // criar o vencimento
+            foreach (var reg in curva) 
+            {
+                //var pu = DataUtils.DiasUteis(dataReferencia,reg.)
+                var relatorio = new DI1CurvaRelatorioDto(
+                    PuAjusteAtual: reg.Ajuste,
+                    FatorTaxaImplicita: reg.Ajuste / PuValorRef,
+                    TaxaImplicita: 1//,Math.Pow(reg.Ajuste / PuValorRef
+                    );
+            }
+
+            var du = DataUtils.DiasUteis(inicio, fim, datas.ToList(), true);
+            var dc = fim - inicio;
+            var u = dc.Days;
+            return ResultResponse<IEnumerable<DI1Curva>>.Ok(curva);
         }
         
     }

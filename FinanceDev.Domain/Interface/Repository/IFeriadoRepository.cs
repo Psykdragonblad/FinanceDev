@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FinanceDev.Domain.Interface.Repository
 {
-    public interface IFeriadosRepository : IGetAll<Feriado>
+    public interface IFeriadoRepository : IGetAll<Feriado>
     {
     }
 }
