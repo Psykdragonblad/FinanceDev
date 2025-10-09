@@ -24,7 +24,7 @@ namespace FinanceDev.Application.Helpers
 
                 if (possuiCabecalho)
                 {
-                    // Pega os cabeçalhos da linha 1
+                    // Pega os cabecalhos da linha 1
                     foreach (var celula in planilha.Row(1).CellsUsed())
                     {
                         var nome = celula.GetString().Trim();
@@ -35,7 +35,7 @@ namespace FinanceDev.Application.Helpers
                 }
                 else
                 {
-                    // Gera nomes automáticos de coluna
+                    // Gera nomes automaticos de coluna
                     var primeiraLinha = planilha.Row(linhaInicial);
                     var totalColunas = primeiraLinha.CellsUsed().Count();
 
@@ -45,7 +45,7 @@ namespace FinanceDev.Application.Helpers
                     }
                 }
 
-                // Lê as linhas a partir da linha inicial
+                // Le as linhas a partir da linha inicial
                 foreach (var linha in planilha.RowsUsed().Where(r => r.RowNumber() >= linhaInicial))
                 {
                     if (linha.IsEmpty()) continue;

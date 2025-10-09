@@ -21,8 +21,6 @@ namespace FinanceDev.API.Controllers
         public ActionResult<ResultResponse<IEnumerable<MesVencimento>>> GetAll() {
            var result = _mesVencimentoService.GetAll();
 
-           // DI1Service d = new DI1Service();
-           // d.teste();
             return Ok(result);
         }
     }

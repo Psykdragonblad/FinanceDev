@@ -82,6 +82,7 @@ namespace FinanceDev.Application.Services
 
                     await _ReferenciaCurvaRepository.AddAsync(referencia);
 
+                    //monta os dados para insercao
                     foreach (var linha in linhas)
                     {
                         if (linha["Coluna14"] != "")
@@ -129,6 +130,7 @@ namespace FinanceDev.Application.Services
                         if (string.IsNullOrWhiteSpace(reg.Vencimento) || reg.Vencimento.Length < 2)
                             throw new Exception($"Campo 'Vencimento' inválido: {reg.Vencimento}");
 
+                        //traz os códigos para saber o vencimento
                         string mesCodigo = reg.Vencimento[0].ToString();
                         string anoCodigo = reg.Vencimento.Substring(1).ToString();
 
@@ -140,10 +142,14 @@ namespace FinanceDev.Application.Services
                         DateTime data = new DateTime(anoInt, mesVenciAux.Id, 1);
                         data = data.AddDays(-1);
 
+                        //descobre primeiro dia util do mes
                         var proximoDiaUtil = DataUtils.ProximoDiaUtil(data, datas.ToList());
+
+                        //descobre os dia uteis e corridos ate o vencimento
                         var du = DataUtils.DiasUteis(inicio, proximoDiaUtil, datas.ToList(), true);
                         int dc = (proximoDiaUtil - inicio).Days;
 
+                        //monta a formula
                         double anualizador = (double)252 / (double)du;
                         double ajuste = Math.Round(reg.Ajuste,2) / 100;
                         double fatorTaxaImplicita = PuValorRef / ajuste;

@@ -2,7 +2,7 @@
 using FinanceDev.Domain.Interface;
 using FinanceDev.Domain.Interface.Repository;
 using FinanceDev.Domain.Shared;
-using FinanceDev.Infraestructure;
+using FinanceDev.Infra.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

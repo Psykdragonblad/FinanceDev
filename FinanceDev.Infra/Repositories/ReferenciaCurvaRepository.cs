@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FinanceDev.Domain.Entities;
 using FinanceDev.Domain.Interface.Repository;
-using FinanceDev.Infraestructure;
+using FinanceDev.Infra.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceDev.Infra.Repositories

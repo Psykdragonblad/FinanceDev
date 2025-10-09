@@ -18,7 +18,7 @@ namespace FinanceDev.Application.Helpers
 
             for (DateTime data = inicio; data <= fim; data = data.AddDays(1))
             {
-                // Verifica se é sábado/domingo ou feriado
+                // Verifica se e sabado, domingo ou feriado
                 if (data.DayOfWeek != DayOfWeek.Saturday &&
                     data.DayOfWeek != DayOfWeek.Sunday &&
                     !feriados.Contains(data.Date))
@@ -37,7 +37,7 @@ namespace FinanceDev.Application.Helpers
         {
             DateTime proximo = data.AddDays(1);
 
-            // Loop até achar um dia útil
+            // Loop ate achar um dia util
             while (EhFinalDeSemana(proximo) || EhFeriado(proximo, feriados))
             {
                 proximo = proximo.AddDays(1);

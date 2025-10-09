@@ -1,6 +1,6 @@
 ﻿using FinanceDev.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-namespace FinanceDev.Infraestructure
+namespace FinanceDev.Infra.Context
 {
     public class AppDbContext : DbContext
     {
