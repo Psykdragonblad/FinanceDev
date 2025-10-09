@@ -109,7 +109,7 @@ namespace FinanceDev.UnitTest.Controllers
         {
             // Arrange
             var request = new GerarCargaRequest(DateTime.Today);
-            var dto = new DI1CurvaRelatorioDto(0.0, 0.0, 0.0, 0);
+            var dto = new DI1CurvaRelatorioDto(0.0, 0.0, 0.0, 0,"x");
             var serviceResponse = ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Ok(new List<DI1CurvaRelatorioDto> { dto });
 
             _curvaServiceMock.Setup(s => s.CurvaDI1(request.Data))

@@ -153,7 +153,8 @@ namespace FinanceDev.Application.Services
                             PuAjusteAtual: ajuste,
                             FatorTaxaImplicita: fatorTaxaImplicita,
                             TaxaImplicita: Math.Round(taxaImplicita, 2),
-                            DiasCorridos: dc
+                            DiasCorridos: dc,
+                            codVencimento: reg.Vencimento
                             );
 
                         curvas.Add(relatorio);
