@@ -35,7 +35,6 @@ namespace FinanceDev.Application.Helpers
 
         public static DateTime ProximoDiaUtil(DateTime data, List<DateTime> feriados)
         {
-            // Começa no dia seguinte
             DateTime proximo = data.AddDays(1);
 
             // Loop até achar um dia útil
