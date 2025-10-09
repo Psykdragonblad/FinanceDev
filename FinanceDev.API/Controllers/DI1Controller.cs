@@ -38,5 +38,16 @@ namespace FinanceDev.Controllers
 
             return Ok(retorno);
         }
+
+        [HttpGet("GetCurva")]
+        public async Task<ActionResult<ResultResponse<DI1CurvaRelatorioDto>>> GetCurva([FromBody] GerarCargaRequest request)
+        {
+            var retorno = await _curvaService.CurvaDI1(request.Data);
+
+            if (!retorno.Success)
+                return BadRequest(retorno);
+
+            return Ok(retorno);
+        }
     }
 }

@@ -32,5 +32,30 @@ namespace FinanceDev.Application.Helpers
 
             return totalDias;
         }
+
+        public static DateTime ProximoDiaUtil(DateTime data, List<DateTime> feriados)
+        {
+            // Começa no dia seguinte
+            DateTime proximo = data.AddDays(1);
+
+            // Loop até achar um dia útil
+            while (EhFinalDeSemana(proximo) || EhFeriado(proximo, feriados))
+            {
+                proximo = proximo.AddDays(1);
+            }
+
+            return proximo;
+        }
+
+        private static bool EhFinalDeSemana(DateTime data)
+        {
+            return data.DayOfWeek == DayOfWeek.Saturday || data.DayOfWeek == DayOfWeek.Sunday;
+        }
+
+        private static bool EhFeriado(DateTime data, List<DateTime> feriados)
+        {
+            // Considera apenas a parte da data (sem hora)
+            return feriados.Exists(f => f.Date == data.Date);
+        }
     }
 }

@@ -20,13 +20,19 @@ namespace FinanceDev.Application.Services
         private readonly IDI1CurvaRepository _dI1CurvaRepository;
         private readonly IReferenciaCurvaRepository _ReferenciaCurvaRepository;
         private readonly IFeriadoRepository _feriadoRepository;
+        private readonly IMesVencimentoRepository _mesVencimentoRepository;
         private readonly string? _caminhoArquivo;
 
-        public DI1Service(IDI1CurvaRepository dI1CurvaRepository, IReferenciaCurvaRepository ReferenciaCurvaRepository, IFeriadoRepository feriadoRepository,IConfiguration configuration) 
+        public DI1Service(IDI1CurvaRepository dI1CurvaRepository, 
+                         IReferenciaCurvaRepository ReferenciaCurvaRepository, 
+                         IFeriadoRepository feriadoRepository,
+                         IMesVencimentoRepository mesVencimentoRepository,
+                         IConfiguration configuration) 
         { 
             _dI1CurvaRepository = dI1CurvaRepository;
             _ReferenciaCurvaRepository = ReferenciaCurvaRepository;
             _feriadoRepository = feriadoRepository;
+            _mesVencimentoRepository = mesVencimentoRepository;
             _caminhoArquivo = configuration["Arquivos:DI1Curva"];
         }
 
@@ -59,8 +65,9 @@ namespace FinanceDev.Application.Services
         {
             try
             {
+               //var a= await CurvaDI1(dataReferencia);
                 string caminhoArquivo = Path.Combine(_caminhoArquivo, "DI1-" + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx");
-                var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 18);
+                var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 16);
 
                 if (linhas == null || !linhas.Any())
                     return ResultResponse.Fail("Nenhum dado encontrado no arquivo. Verifique se o formato e a linha inicial estão corretos.");
@@ -83,10 +90,10 @@ namespace FinanceDev.Application.Services
                             var di1curva = new DI1Curva
                             {
                                 Vencimento = linha["Coluna1"],
-                                Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture),
+                                Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), new CultureInfo("pt-BR")) ,
                                 IdReferenciaCurva = referencia.Id
                             };
-
+                           
                             await _dI1CurvaRepository.AddAsync(di1curva);
                         }
                     }
@@ -97,40 +104,148 @@ namespace FinanceDev.Application.Services
             }
             catch (Exception e)
             {
-                return ResultResponse.Fail($"Erro ao gerar carga: {e.Message}");
+                return ResultResponse.Fail($"Erro ao gerar carga");
             }            
         }
 
-        public async Task<ResultResponse<IEnumerable<DI1Curva>>> CurvaDI1(DateTime dataReferencia)
+        public async Task<ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>> CurvaDI1(DateTime dataReferencia)
         {
-            double PuValorRef = 100000;
+            const double PuValorRef = 100000;
 
-            var inicio = new DateTime(2025, 08, 15);
-            var fim = new DateTime(2025, 11, 3);
-            //List<DateTime> lista = new List<DateTime>();
-            var feriados = await _feriadoRepository.GetAll();
-            var datas = feriados.Select(r => r.Data);
-            //lista.AddRange(datas);
-            //lista.Add(new DateTime(2025,09,7));
-            var curva = await _dI1CurvaRepository.GetByDataAsync(dataReferencia);
-            //DI1CurvaRelatorioDto relatorio;
-
-            // criar o vencimento
-            foreach (var reg in curva) 
+            try
             {
-                //var pu = DataUtils.DiasUteis(dataReferencia,reg.)
-                var relatorio = new DI1CurvaRelatorioDto(
-                    PuAjusteAtual: reg.Ajuste,
-                    FatorTaxaImplicita: reg.Ajuste / PuValorRef,
-                    TaxaImplicita: 1//,Math.Pow(reg.Ajuste / PuValorRef
-                    );
+                var inicio = dataReferencia;
+                var feriados = await _feriadoRepository.GetAll();
+                var datas = feriados.Select(r => r.Data);
+
+                var curva = await _dI1CurvaRepository.GetByDataAsync(dataReferencia);
+                var mesVencimento = await _mesVencimentoRepository.GetAll();
+
+                List<DI1CurvaRelatorioDto> curvas = new List<DI1CurvaRelatorioDto>();
+
+                foreach (var reg in curva)
+                {
+                    try
+                    {
+                        if (string.IsNullOrWhiteSpace(reg.Vencimento) || reg.Vencimento.Length < 2)
+                            throw new Exception($"Campo 'Vencimento' inválido: {reg.Vencimento}");
+
+                        string mesCodigo = reg.Vencimento[0].ToString();
+                        string anoCodigo = reg.Vencimento.Substring(1).ToString();
+
+                        var mesVenciAux = mesVencimento.Where(e => e.Codigo == mesCodigo).FirstOrDefault();
+                        if (mesVenciAux == null)
+                            throw new Exception($"Mês não encontrado para código '{mesCodigo}'.");
+
+                        int anoInt = int.Parse("20" + anoCodigo);
+                        DateTime data = new DateTime(anoInt, mesVenciAux.Id, 1);
+                        data = data.AddDays(-1);
+
+                        var proximoDiaUtil = DataUtils.ProximoDiaUtil(data, datas.ToList());
+                        var du = DataUtils.DiasUteis(inicio, proximoDiaUtil, datas.ToList(), true);
+                        int dc = (proximoDiaUtil - inicio).Days;
+                        double teste1 = (double)252 / (double)du;
+                        double teste44 = Math.Round(reg.Ajuste, 2);
+                        double teste55 = double.Parse(teste44.ToString().Replace(".", ""), new CultureInfo("pt-BR"));
+                        double ajuste = Math.Round(reg.Ajuste,2) / 100;
+                        double fatorTaxaImplicita = PuValorRef / ajuste;
+                        double taxaImplicita = ((Math.Pow(PuValorRef / ajuste, teste1) - 1) * 100);
+
+                        var relatorio = new DI1CurvaRelatorioDto(
+                            PuAjusteAtual: ajuste,
+                            FatorTaxaImplicita: fatorTaxaImplicita,
+                            TaxaImplicita: Math.Round(taxaImplicita, 2),
+                            DiasCorridos: dc
+                            );
+
+                        curvas.Add(relatorio);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Erro ao processar curva {reg?.Vencimento}: {ex.Message}");
+                    }
+                }
+
+                return ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Ok(curvas);
+            }
+            catch (Exception ex)
+            {
+                return ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Fail("Erro inesperado ao gerar a curva DI1.");
             }
 
-            var du = DataUtils.DiasUteis(inicio, fim, datas.ToList(), true);
-            var dc = fim - inicio;
-            var u = dc.Days;
-            return ResultResponse<IEnumerable<DI1Curva>>.Ok(curva);
         }
-        
+        /*public async Task<ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>> CurvaDI1(DateTime dataReferencia)
+        {
+            const double PuValorRef = 100000;
+
+            try
+            {
+                //  Carregamento de dados 
+                var feriados = await _feriadoRepository.GetAll() ?? new List<Feriado>();
+                var feriadosDatas = feriados.Select(f => f.Data).ToList();
+
+                var curva = await _dI1CurvaRepository.GetByDataAsync(dataReferencia);
+                var mesesVencimento = await _mesVencimentoRepository.GetAll() ?? new List<MesVencimento>();
+
+                if (curva == null || !curva.Any())
+                    return ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Fail("Nenhum dado encontrado para a data informada.");
+
+                var resultados = new List<DI1CurvaRelatorioDto>();
+
+                // Processamento
+                foreach (var reg in curva)
+                {
+                    try
+                    {
+                        if (string.IsNullOrWhiteSpace(reg.Vencimento) || reg.Vencimento.Length < 2)
+                            throw new Exception($"Campo 'Vencimento' inválido: {reg.Vencimento}");
+
+                        string mesCodigo = reg.Vencimento.Substring(0, 1);
+                        string anoCodigo = reg.Vencimento.Substring(1);
+
+                        var mesAux = mesesVencimento.FirstOrDefault(m => m.Codigo == mesCodigo);
+                        if (mesAux == null)
+                            throw new Exception($"Mês não encontrado para código '{mesCodigo}'.");
+
+                        if (!int.TryParse("20" + anoCodigo, out int anoInt))
+                            throw new Exception($"Ano inválido: {anoCodigo}");
+
+                        int mesInt = mesAux.Id;
+                        var ultimoDiaMes = new DateTime(anoInt, mesInt, DateTime.DaysInMonth(anoInt, mesInt));
+                        var proximoDiaUtil = DataUtils.ProximoDiaUtil(ultimoDiaMes, feriadosDatas);
+                        var diasUteis = DataUtils.DiasUteis(dataReferencia, proximoDiaUtil, feriadosDatas, true);
+                        int diasCorridos = (proximoDiaUtil - dataReferencia).Days;
+
+                        if (diasUteis == 0)
+                            throw new Exception("Quantidade de dias úteis não pode ser zero.");
+
+                        double ajuste = reg.Ajuste / 100;
+                        double fatorTaxaImplicita = PuValorRef / ajuste;
+                        double taxaImplicita = (Math.Pow(PuValorRef / ajuste, 252.0 / diasUteis) - 1) * 100;
+
+                        var relatorio = new DI1CurvaRelatorioDto(
+                            PuAjusteAtual: ajuste,
+                            FatorTaxaImplicita: fatorTaxaImplicita,
+                            TaxaImplicita: Math.Round(taxaImplicita, 2),
+                            DiasCorridos: diasCorridos
+                        );
+
+                        resultados.Add(relatorio);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Erro ao processar curva {reg?.Vencimento}: {ex.Message}");
+                    }
+                }
+
+                return ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Ok(resultados);
+            }
+            catch (Exception ex)
+            {
+                return ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Fail("Erro inesperado ao gerar a curva DI1.");
+            }
+        }
+        */
+
     }
 }

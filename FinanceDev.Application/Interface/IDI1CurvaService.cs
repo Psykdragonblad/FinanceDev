@@ -13,5 +13,6 @@ namespace FinanceDev.Application.Interface
     {
         Task<ResultResponse<IEnumerable<DI1CurvaDto>>> GetByDataAsync(DateTime date);
         Task<ResultResponse> Add(DateTime dataReferencia);
+        Task<ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>> CurvaDI1(DateTime dataReferencia);
     }
 }
