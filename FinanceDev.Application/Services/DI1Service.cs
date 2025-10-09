@@ -67,7 +67,7 @@ namespace FinanceDev.Application.Services
             {
                //var a= await CurvaDI1(dataReferencia);
                 string caminhoArquivo = Path.Combine(_caminhoArquivo, "DI1-" + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx");
-                var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 16);
+                var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 18);
 
                 if (linhas == null || !linhas.Any())
                     return ResultResponse.Fail("Nenhum dado encontrado no arquivo. Verifique se o formato e a linha inicial estão corretos.");
@@ -90,7 +90,7 @@ namespace FinanceDev.Application.Services
                             var di1curva = new DI1Curva
                             {
                                 Vencimento = linha["Coluna1"],
-                                Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), new CultureInfo("pt-BR")) ,
+                                Ajuste = double.Parse(linha["Coluna14"].Replace(".", ""), CultureInfo.InvariantCulture),
                                 IdReferenciaCurva = referencia.Id
                             };
                            
