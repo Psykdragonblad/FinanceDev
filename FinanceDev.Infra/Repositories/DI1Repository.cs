@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FinanceDev.Infraestructure.Repositories
 {
-    public class DI1Repository// : IAdicionar<DI1>
+    public class DI1Repository
     {
         private readonly AppDbContext _context;
 
@@ -28,10 +28,6 @@ namespace FinanceDev.Infraestructure.Repositories
             return await _context.DI1.Where(e => e.DataReferencia == data).AsNoTracking().ToListAsync();
         
         }
-
-       /* Task IAdicionar<DI1>.AddAsync(DI1 entidade)
-        {
-            throw new NotImplementedException();
-        }*/
+      
     }
 }
