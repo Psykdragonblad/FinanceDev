@@ -13,15 +13,17 @@ namespace FinanceDev.Infra.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(DI1Curva entidade)
+        public async Task AddAsync(DI1Curva entidade, bool autoSave)
         {
             await _context.AddAsync(entidade);
-            await _context.SaveChangesAsync();
+
+            if(autoSave) 
+                await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<DI1Curva>> GetByDataAsync(DateTime data)
+        public IQueryable<DI1Curva> GetByDataAsync(DateTime data)
         {
-            return await _context.DI1Curva.Where(e => e.ReferenciaCurva.DataReferencia == data).AsNoTracking().ToListAsync();
+            return _context.DI1Curva.Where(e => e.ReferenciaCurva.DataReferencia == data).AsNoTracking();
 
         }
     }

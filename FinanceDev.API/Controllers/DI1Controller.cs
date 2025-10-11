@@ -18,9 +18,9 @@ namespace FinanceDev.Controllers
         }
 
         [HttpGet("GetByData")]
-        public async Task<ActionResult<IEnumerable<ResultResponse>>> GetAction([FromBody] GerarCargaRequest request) 
+        public ActionResult<IEnumerable<ResultResponse>> GetAction([FromBody] GerarCargaRequest request) 
         {
-            var retorno = await _curvaService.GetByDataAsync(request.Data);
+            var retorno = _curvaService.GetByData(request.Data);
 
             if (!retorno.Success)
                 return BadRequest(retorno);
@@ -40,9 +40,9 @@ namespace FinanceDev.Controllers
         }
 
         [HttpGet("GetCurva")]
-        public async Task<ActionResult<ResultResponse<DI1CurvaRelatorioDto>>> GetCurva([FromBody] GerarCargaRequest request)
+        public ActionResult<ResultResponse<DI1CurvaRelatorioDto>> GetCurva([FromBody] GerarCargaRequest request)
         {
-            var retorno = await _curvaService.CurvaDI1(request.Data);
+            var retorno = _curvaService.CurvaDI1(request.Data);
 
             if (!retorno.Success)
                 return BadRequest(retorno);

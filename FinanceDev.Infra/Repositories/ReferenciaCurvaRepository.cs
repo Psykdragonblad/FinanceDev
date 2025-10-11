@@ -19,10 +19,12 @@ namespace FinanceDev.Infra.Repositories
             _appDbContext = appDbContext;
         }
 
-        public async Task AddAsync(ReferenciaCurva entidade)
+        public async Task AddAsync(ReferenciaCurva entidade, bool autoSave = true)
         {
             await _appDbContext.AddAsync(entidade);
-            await _appDbContext.SaveChangesAsync();
+
+            if(autoSave)
+                await _appDbContext.SaveChangesAsync();
         }
 
         public async Task<bool> ExistsAsync(DateTime data)

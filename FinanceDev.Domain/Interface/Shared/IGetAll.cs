@@ -9,6 +9,6 @@ namespace FinanceDev.Domain.Interface.Shared
 {
     public interface IGetAll<T>
     {
-        Task<IEnumerable<T>> GetAll();
+        IQueryable<T> GetAll();
     }
 }

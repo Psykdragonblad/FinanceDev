@@ -16,9 +16,9 @@ namespace FinanceDev.Infra.Repositories
         public FeriadoRepository(AppDbContext appDbContext) { 
             _appDbContext = appDbContext;
         }
-        public async Task<IEnumerable<Feriado>> GetAll()
+        public IQueryable<Feriado> GetAll()
         {
-            return await _appDbContext.Feriado.AsNoTracking().ToListAsync();
+            return _appDbContext.Feriado.AsNoTracking();
         }
     }
 }

@@ -11,8 +11,8 @@ namespace FinanceDev.Application.Interface
 {
     public interface IDI1CurvaService
     {
-        Task<ResultResponse<IEnumerable<DI1CurvaDto>>> GetByDataAsync(DateTime date);
+        ResultResponse<IEnumerable<DI1CurvaDto>> GetByData(DateTime date);
         Task<ResultResponse> Add(DateTime dataReferencia);
-        Task<ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>> CurvaDI1(DateTime dataReferencia);
+        ResultResponse<IEnumerable<DI1CurvaRelatorioDto>> CurvaDI1(DateTime dataReferencia);
     }
 }

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace FinanceDev.Application.Services
 {
     public class DI1Service: IDI1CurvaService
@@ -36,11 +37,11 @@ namespace FinanceDev.Application.Services
             _caminhoArquivo = configuration["Arquivos:DI1Curva"];
         }
 
-        public async Task<ResultResponse<IEnumerable<DI1CurvaDto>>> GetByDataAsync(DateTime date)
+        public ResultResponse<IEnumerable<DI1CurvaDto>> GetByData(DateTime date)
         {
             try
             {
-                var retorno = await _dI1CurvaRepository.GetByDataAsync(date);
+                var retorno = _dI1CurvaRepository.GetByDataAsync(date).ToList();
 
                 if (!retorno.Any())
                 {
@@ -65,7 +66,7 @@ namespace FinanceDev.Application.Services
         {
             try
             {
-                string caminhoArquivo = Path.Combine(_caminhoArquivo, "DI1-" + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx");
+                string caminhoArquivo = Path.Combine(_caminhoArquivo ?? "", "DI1-" + dataReferencia.ToString("dd-MM-yyyy") + ".xlsx");
                 var linhas = ExcelHelper.LerArquivo(caminhoArquivo, possuiCabecalho: false, linhaInicial: 18);
 
                 if (linhas == null || !linhas.Any())
@@ -104,22 +105,22 @@ namespace FinanceDev.Application.Services
             }
             catch (Exception e)
             {
-                return ResultResponse.Fail($"Erro ao gerar carga");
+                return ResultResponse.Fail($"Erro ao gerar carga { e.Message }");
             }            
         }
 
-        public async Task<ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>> CurvaDI1(DateTime dataReferencia)
+        public ResultResponse<IEnumerable<DI1CurvaRelatorioDto>> CurvaDI1(DateTime dataReferencia)
         {
             const double PuValorRef = 100000;
 
             try
             {
                 var inicio = dataReferencia;
-                var feriados = await _feriadoRepository.GetAll();
+                var feriados = _feriadoRepository.GetAll().ToList();
                 var datas = feriados.Select(r => r.Data);
 
-                var curva = await _dI1CurvaRepository.GetByDataAsync(dataReferencia);
-                var mesVencimento = await _mesVencimentoRepository.GetAll();
+                var curva =  _dI1CurvaRepository.GetByDataAsync(dataReferencia).ToList();
+                var mesVencimento =  _mesVencimentoRepository.GetAll().ToList();
 
                 List<DI1CurvaRelatorioDto> curvas = new List<DI1CurvaRelatorioDto>();
 
@@ -173,7 +174,7 @@ namespace FinanceDev.Application.Services
 
                 return ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Ok(curvas);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return ResultResponse<IEnumerable<DI1CurvaRelatorioDto>>.Fail("Erro inesperado ao gerar a curva DI1.");
             }

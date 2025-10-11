@@ -8,6 +8,6 @@ namespace FinanceDev.Domain.Interface.Shared
 {
     public interface IAdicionar<T>
     {
-        Task AddAsync(T entidade);
+        Task AddAsync(T entidade, bool autoSave = true);
     }
 }

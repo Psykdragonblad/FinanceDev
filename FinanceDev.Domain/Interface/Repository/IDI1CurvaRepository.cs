@@ -10,6 +10,6 @@ namespace FinanceDev.Domain.Interface.Repository
 {
     public interface IDI1CurvaRepository: IAdicionar<DI1Curva>
     {
-        Task<IEnumerable<DI1Curva>> GetByDataAsync(DateTime data);
+        IQueryable<DI1Curva> GetByDataAsync(DateTime data);
     }
 }
